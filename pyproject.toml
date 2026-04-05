@@ -1,0 +1,26 @@
+[project]
+name = "transformer-chess"
+version = "0.1.0"
+description = "Chess engine prototype based on a square-level transformer and Lichess evaluation soft targets."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "python-chess>=1.999",
+    "tqdm>=4.66",
+    "torch>=2.3",
+    "zstandard>=0.23",
+]
+
+[project.scripts]
+transformer-chess = "transformer_chess.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
