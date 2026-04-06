@@ -7,10 +7,17 @@ import chess
 import torch
 
 from .dataset import build_dataset_from_lichess_evals, load_manifest, make_dataloader
+from .device import get_default_device
 from .inference import load_model_checkpoint, predict_value, rank_model_moves
 from .lichess_eval import LICHESS_EVAL_URL, download_eval_subset
 from .model import BoardValueTransformer, ValueTransformerConfig
-from .train import evaluate_loss, make_optimizer, train_epoch
+from .train import (
+    TRAINING_PRECISION_CHOICES,
+    evaluate_loss,
+    make_optimizer,
+    resolve_training_precision,
+    train_epoch,
+)
 
 
 def _add_common_model_args(parser: argparse.ArgumentParser) -> None:
@@ -67,8 +74,11 @@ def _train_command(args: argparse.Namespace) -> int:
     if manifest.num_train == 0:
         raise ValueError("Dataset has no training samples.")
 
+    device = get_default_device()
+    precision = resolve_training_precision(device, args.precision)
     model = _model_from_args(args)
     optimizer = make_optimizer(model, lr=args.lr, weight_decay=args.weight_decay)
+    print(f"training device={device} precision={precision}")
 
     for epoch in range(args.epochs):
         train_loader = make_dataloader(
@@ -83,6 +93,8 @@ def _train_command(args: argparse.Namespace) -> int:
             model,
             optimizer,
             train_loader,
+            device=device,
+            precision=precision,
             max_batches=args.max_train_batches,
         )
 
@@ -96,7 +108,13 @@ def _train_command(args: argparse.Namespace) -> int:
                 seed=args.seed,
                 shuffle=False,
             )
-            val_loss = evaluate_loss(model, val_loader, max_batches=args.max_val_batches)
+            val_loss = evaluate_loss(
+                model,
+                val_loader,
+                device=device,
+                precision=precision,
+                max_batches=args.max_val_batches,
+            )
             summary += f", val_loss={val_loss:.6f}"
         print(summary)
 
@@ -178,6 +196,7 @@ def build_parser() -> argparse.ArgumentParser:
     train_parser.add_argument("--seed", type=int, default=0)
     train_parser.add_argument("--max-train-batches", type=int, default=None)
     train_parser.add_argument("--max-val-batches", type=int, default=None)
+    train_parser.add_argument("--precision", default="auto", choices=TRAINING_PRECISION_CHOICES)
     _add_common_model_args(train_parser)
     train_parser.set_defaults(func=_train_command)
 

@@ -21,7 +21,14 @@ from .inference import (
 from .lichess_eval import LICHESS_EVAL_URL, download_eval_subset, iter_value_positions
 from .model import BoardValueTransformer, ValueTransformerConfig
 from .move_selection import rank_legal_moves, select_best_move
-from .train import evaluate_loss, make_optimizer, train_epoch, train_step
+from .train import (
+    TRAINING_PRECISION_CHOICES,
+    evaluate_loss,
+    make_optimizer,
+    resolve_training_precision,
+    train_epoch,
+    train_step,
+)
 
 __all__ = [
     "BoardValueTransformer",
@@ -30,6 +37,7 @@ __all__ = [
     "LICHESS_EVAL_URL",
     "LoadedModel",
     "ShardedEvaluationDataset",
+    "TRAINING_PRECISION_CHOICES",
     "ValueTransformerConfig",
     "build_dataset_from_lichess_evals",
     "build_parser",
@@ -48,6 +56,7 @@ __all__ = [
     "predict_value",
     "rank_legal_moves",
     "rank_model_moves",
+    "resolve_training_precision",
     "resolve_device",
     "select_best_move",
     "select_model_move",

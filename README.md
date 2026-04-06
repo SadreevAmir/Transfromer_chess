@@ -73,8 +73,11 @@ transformer-chess train \
   --dataset-dir data/processed/value_lichess_1m \
   --output artifacts/value_model.pt \
   --epochs 3 \
-  --batch-size 256
+  --batch-size 256 \
+  --precision bf16
 ```
+
+Для `A100` в Colab используй `--precision bf16`. Значение `auto` тоже выберет `bf16` на CUDA-устройствах с поддержкой `bfloat16`.
 
 ## Инференс
 
